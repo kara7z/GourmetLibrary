@@ -13,6 +13,10 @@ class AuthController extends Controller
 
     function Login(ApiLoginRequest $request)
     {
-       return $this->ok($request->get('email'));
+        return $this->ok($request->get('email'));
+    }
+    function register()
+    {
+        return $this->ok('register ff');
     }
 }

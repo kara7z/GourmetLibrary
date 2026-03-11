@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Models\Ticket;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -9,7 +10,9 @@ Route::get('/', function () {
     ],200);
 });
 Route::post('/login',[AuthController::class,'login']);
-
+Route::get('/tickets',function () {
+    return Ticket::all();
+});
 
 
 Route::get('/test', function () {
