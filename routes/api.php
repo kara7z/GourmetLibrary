@@ -1,29 +1,31 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
-use App\Models\Ticket;
+use App\Http\Controllers\BookController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return response()->json([
         'message' => 'Worked, by success'
-    ],200);
-});
-Route::post('/login',[AuthController::class,'login']);
-Route::get('/tickets',function () {
-    return Ticket::all();
+    ], 200);
 });
 
 
-Route::get('/test', function () {
-    return response()->json([
-        'message' => 'API works',
-    ]);
+
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
 });
 
-Route::get('/books', function () {
-    return response()->json([
-        ['id' => 1, 'title' => 'Book 1'],
-        ['id' => 2, 'title' => 'Book 2'],
-    ]);
-});  
+// books Routes
+Route::get('/books', [BookController::class, 'index']);
+Route::get('/books/{book}', [BookController::class, 'show']);
+
+Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+    Route::post('/books', [BookController::class, 'store']);
+    Route::put('/books/{book}', [BookController::class, 'update']);
+    Route::delete('/books/{book}', [BookController::class, 'destroy']);
+});
