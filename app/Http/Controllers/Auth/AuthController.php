@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Hash;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
@@ -19,6 +20,7 @@ class AuthController extends Controller
         ]);
 
         $fields['password'] = Hash::make($fields['password']);
+        $fields['role'] = User::query()->count() === 0 ? 'admin' : 'gourmand';
 
         $user = User::create($fields);
 
@@ -28,7 +30,7 @@ class AuthController extends Controller
             'message' => 'User was created successfully',
             'user' => $user,
             'token' => $token,
-        ], 201);
+        ], 202);
     }
 
     function login(Request $request)
@@ -57,8 +59,24 @@ class AuthController extends Controller
 
     function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
 
+        $token = $request->bearerToken() ?: $request->input('token');
+
+        if (!$token) {
+            return response()->json([
+                'message' => 'Unauthenticated. Provide a Bearer token or token field.'
+            ], 401);
+        }
+
+        $accessToken = PersonalAccessToken::findToken($token);
+
+        if (!$accessToken) {
+            return response()->json([
+                'message' => 'Unauthenticated. Invalid token.'
+            ], 401);
+        }
+
+        $accessToken->delete();
         return response()->json([
             'message' => 'Logged out successfully'
         ], 200);

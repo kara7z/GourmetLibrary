@@ -24,12 +24,12 @@ class BookController extends Controller
             });
         }
 
-        // 📂 Filter by category
+        
         if ($request->has('category_id')) {
             $query->where('category_id', $request->category_id);
         }
 
-        // 🔥 Sorting
+        
         if ($request->sort === 'popular') {
             $query->orderBy('borrow_count', 'desc');
         } elseif ($request->sort === 'new') {

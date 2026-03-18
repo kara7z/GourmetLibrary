@@ -1,0 +1,667 @@
+openapi: 3.0.3
+info:
+  title: GourmetLibrary API
+  description: |
+    API REST pour la médiathèque culinaire GourmetLibrary.
+
+    ## Authentification
+    Cette API utilise **Laravel Sanctum** (Bearer Token).
+    1. Créez un compte via `POST /register` ou connectez-vous via `POST /login`
+    2. Copiez le `token` retourné
+    3. Ajoutez l'en-tête `Authorization: Bearer {token}` à vos requêtes protégées
+
+    ## Rôles
+    - **gourmand** : lecture seule (livres, catégories)
+    - **admin** (Chef Bibliothécaire) : gestion complète + statistiques
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8000/api
+    description: Serveur de développement local
+
+tags:
+  - name: Authentification
+  - name: Livres
+  - name: Catégories
+  - name: Emprunts
+  - name: Administration
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+
+  schemas:
+    Category:
+      type: object
+      properties:
+        id: { type: integer, example: 1 }
+        name: { type: string, example: "Pâtisserie Française" }
+        description: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    Book:
+      type: object
+      properties:
+        id: { type: integer, example: 1 }
+        title: { type: string, example: "Le Grand Livre de Pâtisserie" }
+        author: { type: string, nullable: true, example: "Chef Dupont" }
+        description: { type: string, nullable: true }
+        publication_date: { type: string, format: date, nullable: true, example: "2023-01-15" }
+        category_id: { type: integer, example: 1 }
+        is_new_arrival: { type: boolean, example: false }
+        consultation_count: { type: integer, example: 42 }
+        borrow_count: { type: integer, example: 18 }
+        damaged_quantity: { type: integer, example: 2 }
+        category: { $ref: '#/components/schemas/Category' }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    User:
+      type: object
+      properties:
+        id: { type: integer, example: 1 }
+        name: { type: string, example: "Chef Admin" }
+        email: { type: string, format: email, example: "admin@gourmet.com" }
+        role: { type: string, enum: [admin, gourmand], example: gourmand }
+        created_at: { type: string, format: date-time }
+
+    PaginatedBooks:
+      type: object
+      properties:
+        data: { type: array, items: { $ref: '#/components/schemas/Book' } }
+        current_page: { type: integer }
+        last_page: { type: integer }
+        per_page: { type: integer }
+        total: { type: integer }
+        next_page_url: { type: string, nullable: true }
+        prev_page_url: { type: string, nullable: true }
+
+    PaginatedCategories:
+      type: object
+      properties:
+        data: { type: array, items: { $ref: '#/components/schemas/Category' } }
+        current_page: { type: integer }
+        last_page: { type: integer }
+        per_page: { type: integer }
+        total: { type: integer }
+
+    ValidationError:
+      type: object
+      properties:
+        message: { type: string, example: "The given data was invalid." }
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items: { type: string }
+
+    ErrorResponse:
+      type: object
+      properties:
+        message: { type: string }
+
+paths:
+
+  # ── AUTHENTICATION ────────────────────────────────────────────────────────────
+
+  /register:
+    post:
+      tags: [Authentification]
+      summary: Créer un compte
+      description: Le premier utilisateur enregistré reçoit automatiquement le rôle `admin`. Tous les suivants reçoivent `gourmand`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password, password_confirmation]
+              properties:
+                name: { type: string, minLength: 4, example: "Jean Dupont" }
+                email: { type: string, format: email, example: "jean@example.com" }
+                password: { type: string, format: password, example: "Secret123!" }
+                password_confirmation: { type: string, format: password, example: "Secret123!" }
+      responses:
+        "202":
+          description: Compte créé avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: "User was created successfully" }
+                  user: { $ref: '#/components/schemas/User' }
+                  token: { type: string, example: "1|abc123..." }
+        "422":
+          description: Données invalides
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ValidationError' }
+
+  /login:
+    post:
+      tags: [Authentification]
+      summary: Se connecter
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email, example: "admin@gourmet.com" }
+                password: { type: string, format: password, example: "password" }
+      responses:
+        "200":
+          description: Connexion réussie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: "Login successful" }
+                  user: { $ref: '#/components/schemas/User' }
+                  token: { type: string, example: "2|xyz789..." }
+        "401":
+          description: Identifiants invalides
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /logout:
+    post:
+      tags: [Authentification]
+      summary: Se déconnecter
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Déconnexion réussie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: "Logged out successfully" }
+        "401":
+          description: Non authentifié
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  # ── BOOKS ─────────────────────────────────────────────────────────────────────
+
+  /books:
+    get:
+      tags: [Livres]
+      summary: Lister les livres
+      description: |
+        Retourne la liste paginée des livres.
+        - Recherche par titre, auteur ou catégorie via `q`
+        - Filtrer par catégorie via `category_id`
+        - Trier par popularité (`sort=popular`) ou nouveautés (`sort=new`)
+      parameters:
+        - { name: q, in: query, description: "Recherche titre / auteur / catégorie", schema: { type: string, example: "chocolat" } }
+        - { name: category_id, in: query, description: "Filtrer par catégorie", schema: { type: integer, example: 1 } }
+        - { name: sort, in: query, description: "Tri", schema: { type: string, enum: [popular, new] } }
+        - { name: page, in: query, schema: { type: integer, default: 1 } }
+      responses:
+        "200":
+          description: Liste paginée des livres
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaginatedBooks' }
+
+    post:
+      tags: [Livres]
+      summary: Ajouter un livre (admin)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, category_id]
+              properties:
+                title: { type: string, example: "L'Art de la Brioche" }
+                author: { type: string, nullable: true, example: "Chef Martin" }
+                description: { type: string, nullable: true }
+                publication_date: { type: string, format: date, nullable: true, example: "2024-03-01" }
+                category_id: { type: integer, example: 1 }
+                is_new_arrival: { type: boolean, default: false }
+      responses:
+        "201":
+          description: Livre créé
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: "Book created successfully" }
+                  book: { $ref: '#/components/schemas/Book' }
+        "403":
+          description: Accès refusé
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        "422":
+          description: Données invalides
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ValidationError' }
+
+  /books/{id}:
+    get:
+      tags: [Livres]
+      summary: Voir un livre
+      description: Retourne les détails d'un livre et incrémente son compteur de consultations.
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer, example: 1 } }
+      responses:
+        "200":
+          description: Détails du livre
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Book' }
+        "404":
+          description: Livre non trouvé
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+    put:
+      tags: [Livres]
+      summary: Modifier un livre (admin)
+      security:
+        - BearerAuth: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer, example: 1 } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: { type: string }
+                author: { type: string, nullable: true }
+                description: { type: string, nullable: true }
+                publication_date: { type: string, format: date, nullable: true }
+                category_id: { type: integer }
+                is_new_arrival: { type: boolean }
+                damaged_quantity: { type: integer, minimum: 0, description: "Nombre d'exemplaires dégradés" }
+      responses:
+        "200":
+          description: Livre mis à jour
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: "Book updated successfully" }
+                  book: { $ref: '#/components/schemas/Book' }
+        "403":
+          description: Accès refusé
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        "404":
+          description: Livre non trouvé
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+    delete:
+      tags: [Livres]
+      summary: Supprimer un livre (admin)
+      security:
+        - BearerAuth: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer, example: 1 } }
+      responses:
+        "200":
+          description: Livre supprimé
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: "Book deleted successfully" }
+        "403":
+          description: Accès refusé
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        "404":
+          description: Livre non trouvé
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  # ── CATEGORIES ────────────────────────────────────────────────────────────────
+
+  /categories:
+    get:
+      tags: [Catégories]
+      summary: Lister les catégories
+      parameters:
+        - { name: q, in: query, description: "Recherche nom / description", schema: { type: string } }
+        - { name: sort, in: query, schema: { type: string, enum: [name] } }
+        - { name: with_books_count, in: query, description: "Inclure le nombre de livres", schema: { type: boolean } }
+        - { name: with_books, in: query, description: "Inclure les livres", schema: { type: boolean } }
+        - { name: page, in: query, schema: { type: integer, default: 1 } }
+      responses:
+        "200":
+          description: Liste paginée des catégories
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaginatedCategories' }
+
+    post:
+      tags: [Catégories]
+      summary: Créer une catégorie (admin)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string, example: "Sans Gluten" }
+                description: { type: string, nullable: true, example: "Recettes sans gluten pour tous" }
+      responses:
+        "201":
+          description: Catégorie créée
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: "Category created successfully" }
+                  category: { $ref: '#/components/schemas/Category' }
+        "403":
+          description: Accès refusé
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        "422":
+          description: Données invalides (nom déjà existant)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ValidationError' }
+
+  /categories/{id}:
+    get:
+      tags: [Catégories]
+      summary: Voir une catégorie
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer, example: 1 } }
+        - { name: with_books, in: query, description: "Inclure les livres de cette catégorie", schema: { type: boolean } }
+      responses:
+        "200":
+          description: Détails de la catégorie
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Category' }
+        "404":
+          description: Catégorie non trouvée
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+    put:
+      tags: [Catégories]
+      summary: Modifier une catégorie (admin)
+      security:
+        - BearerAuth: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer, example: 1 } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string, example: "Pâtisserie Moderne" }
+                description: { type: string, nullable: true }
+      responses:
+        "200":
+          description: Catégorie mise à jour
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: "Category updated successfully" }
+                  category: { $ref: '#/components/schemas/Category' }
+        "403":
+          description: Accès refusé
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        "404":
+          description: Catégorie non trouvée
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+    delete:
+      tags: [Catégories]
+      summary: Supprimer une catégorie (admin)
+      description: Supprime la catégorie et tous ses livres associés (cascade).
+      security:
+        - BearerAuth: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer, example: 1 } }
+      responses:
+        "200":
+          description: Catégorie supprimée
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: "Category deleted successfully" }
+        "403":
+          description: Accès refusé
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        "404":
+          description: Catégorie non trouvée
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  # ── BORROWS ───────────────────────────────────────────────────────────────────
+
+  /borrows:
+    get:
+      tags: [Emprunts]
+      summary: Mes emprunts
+      description: Retourne la liste paginée des emprunts de l'utilisateur connecté.
+      security:
+        - BearerAuth: []
+      parameters:
+        - { name: page, in: query, schema: { type: integer, default: 1 } }
+      responses:
+        "200":
+          description: Liste paginée des emprunts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: integer }
+                        user_id: { type: integer }
+                        book_id: { type: integer }
+                        status: { type: string, enum: [borrowed, returned] }
+                        borrowed_at: { type: string, format: date-time }
+                        returned_at: { type: string, format: date-time, nullable: true }
+                        book: { $ref: '#/components/schemas/Book' }
+        "401":
+          description: Non authentifié
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /books/{id}/borrow:
+    post:
+      tags: [Emprunts]
+      summary: Emprunter un livre
+      description: Crée un emprunt pour le livre donné. Un utilisateur ne peut pas emprunter le même livre deux fois simultanément.
+      security:
+        - BearerAuth: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer, example: 1 } }
+      responses:
+        "201":
+          description: Livre emprunté avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: "Book borrowed successfully." }
+                  borrow:
+                    type: object
+                    properties:
+                      id: { type: integer }
+                      user_id: { type: integer }
+                      book_id: { type: integer }
+                      status: { type: string, example: borrowed }
+                      borrowed_at: { type: string, format: date-time }
+                      book: { $ref: '#/components/schemas/Book' }
+        "401":
+          description: Non authentifié
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        "404":
+          description: Livre non trouvé
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        "409":
+          description: Livre déjà emprunté
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /borrows/{id}/return:
+    patch:
+      tags: [Emprunts]
+      summary: Retourner un livre
+      description: Marque l'emprunt comme retourné et enregistre la date de retour.
+      security:
+        - BearerAuth: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer, example: 1 } }
+      responses:
+        "200":
+          description: Livre retourné avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: "Book returned successfully." }
+                  borrow:
+                    type: object
+                    properties:
+                      id: { type: integer }
+                      status: { type: string, example: returned }
+                      returned_at: { type: string, format: date-time }
+                      book: { $ref: '#/components/schemas/Book' }
+        "401":
+          description: Non authentifié
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        "403":
+          description: Cet emprunt n'appartient pas à l'utilisateur
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        "404":
+          description: Emprunt non trouvé
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        "409":
+          description: Livre déjà retourné
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  # ── ADMIN ─────────────────────────────────────────────────────────────────────
+
+  /admin/stats:
+    get:
+      tags: [Administration]
+      summary: Statistiques de la collection (admin)
+      description: |
+        Tableau de bord complet :
+        - Vue d'ensemble (total livres, catégories, exemplaires dégradés)
+        - Top 5 livres les plus consultés
+        - Top 5 livres les plus empruntés
+        - Catégories classées par nombre de livres
+        - Liste des livres dégradés avec leur quantité
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Statistiques de la médiathèque
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  overview:
+                    type: object
+                    properties:
+                      total_books: { type: integer, example: 42 }
+                      total_categories: { type: integer, example: 8 }
+                      total_damaged_copies: { type: integer, example: 7 }
+                  most_consulted_books:
+                    type: array
+                    items: { $ref: '#/components/schemas/Book' }
+                  most_borrowed_books:
+                    type: array
+                    items: { $ref: '#/components/schemas/Book' }
+                  categories_by_book_count:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: integer }
+                        name: { type: string }
+                        books_count: { type: integer }
+                  damaged_books:
+                    type: array
+                    items: { $ref: '#/components/schemas/Book' }
+        "401":
+          description: Non authentifié
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        "403":
+          description: Accès refusé (admin requis)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
