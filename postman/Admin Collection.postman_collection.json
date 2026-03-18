@@ -1,0 +1,469 @@
+{
+  "info": {
+    "_postman_id": "28e41409-a2a8-43eb-919d-c83328d978a6",
+    "name": "Admin Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "53042743",
+    "_collection_link": "https://go.postman.co/collection/53042743-28e41409-a2a8-43eb-919d-c83328d978a6?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Show Categories",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "12|Mhv8yUO52am7Lc79ZfxkcxCDvlvUlVBmPwKPRdll53487173",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "email",
+                  "value": "kara@gmail.com",
+                  "type": "text",
+                  "uuid": "9ac5c14c-329d-4ee8-89bb-7ae394165f00"
+                },
+                {
+                  "key": "password",
+                  "value": "password",
+                  "type": "text",
+                  "uuid": "233adbab-7548-4943-b63b-cbeeea949fbf"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/categories",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "categories"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "1|6g5DHb57PIFgVaCHHmSEnVsemoyXmxmGKGCr2NyB1b556e43",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Gaming 4ever",
+                  "type": "text",
+                  "uuid": "4ed61c28-986e-47c9-8c88-57180cce587e"
+                },
+                {
+                  "key": "description",
+                  "value": "playing games & have fun",
+                  "type": "text",
+                  "uuid": "4c5202fc-dec7-4651-a7cc-3cc7adddb54e"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/categories/4",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "categories",
+                "4"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Category",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "1|6g5DHb57PIFgVaCHHmSEnVsemoyXmxmGKGCr2NyB1b556e43",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Gaming",
+                  "type": "text",
+                  "uuid": "4ed61c28-986e-47c9-8c88-57180cce587e"
+                },
+                {
+                  "key": "description",
+                  "value": "Having Fun",
+                  "type": "text",
+                  "uuid": "4c5202fc-dec7-4651-a7cc-3cc7adddb54e"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/categories",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "categories"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Category",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "1|6g5DHb57PIFgVaCHHmSEnVsemoyXmxmGKGCr2NyB1b556e43",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/categories/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "categories",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Books",
+      "item": [
+        {
+          "name": "Delete Book",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "1|6g5DHb57PIFgVaCHHmSEnVsemoyXmxmGKGCr2NyB1b556e43",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/books/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "books",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Book",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "1|6g5DHb57PIFgVaCHHmSEnVsemoyXmxmGKGCr2NyB1b556e43",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Minecraft basics",
+                  "type": "text",
+                  "uuid": "85914213-4ae5-4af6-9438-f805dc16bd69"
+                },
+                {
+                  "key": "author\n",
+                  "value": "Kara Oussama",
+                  "type": "text",
+                  "uuid": "eb9faeec-04da-4e1a-b6d7-2168364fe329"
+                },
+                {
+                  "key": "description",
+                  "value": "f",
+                  "type": "text",
+                  "uuid": "f4792690-4bbd-42c3-860e-95fefd6db02f",
+                  "disabled": true
+                },
+                {
+                  "key": "publication_date\n",
+                  "value": "2025-09-01",
+                  "type": "text",
+                  "uuid": "827f0793-7f98-4465-8362-c433479cf26b"
+                },
+                {
+                  "key": "category_id",
+                  "value": "4",
+                  "type": "text",
+                  "uuid": "172dea5c-1826-4a74-8e49-caed1761c17a"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/books",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "books"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Book",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "1|6g5DHb57PIFgVaCHHmSEnVsemoyXmxmGKGCr2NyB1b556e43",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Patisserie Française",
+                  "type": "text",
+                  "uuid": "85914213-4ae5-4af6-9438-f805dc16bd69",
+                  "disabled": true
+                },
+                {
+                  "key": "author\n",
+                  "value": "Pierre Hermé",
+                  "type": "text",
+                  "uuid": "eb9faeec-04da-4e1a-b6d7-2168364fe329",
+                  "disabled": true
+                },
+                {
+                  "key": "description",
+                  "value": "Very Good Book",
+                  "type": "text",
+                  "uuid": "f4792690-4bbd-42c3-860e-95fefd6db02f"
+                },
+                {
+                  "key": "publication_date\n",
+                  "value": "2024-09-01",
+                  "type": "text",
+                  "uuid": "827f0793-7f98-4465-8362-c433479cf26b",
+                  "disabled": true
+                },
+                {
+                  "key": "category_id",
+                  "value": "2",
+                  "type": "text",
+                  "uuid": "172dea5c-1826-4a74-8e49-caed1761c17a",
+                  "disabled": true
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/books/4",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "books",
+                "4"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Show Books",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/books",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "books"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Show Stats",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "1|6g5DHb57PIFgVaCHHmSEnVsemoyXmxmGKGCr2NyB1b556e43",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/admin/stats",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "admin",
+                "stats"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

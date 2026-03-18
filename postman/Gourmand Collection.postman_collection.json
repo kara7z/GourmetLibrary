@@ -1,0 +1,197 @@
+{
+  "info": {
+    "_postman_id": "630eff73-279f-4e82-a41b-67af95d3c0cf",
+    "name": "Gourmand Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "53042743",
+    "_collection_link": "https://go.postman.co/collection/53042743-630eff73-279f-4e82-a41b-67af95d3c0cf?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Show Categories",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "12|Mhv8yUO52am7Lc79ZfxkcxCDvlvUlVBmPwKPRdll53487173",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "email",
+                  "value": "kara@gmail.com",
+                  "type": "text",
+                  "uuid": "9ac5c14c-329d-4ee8-89bb-7ae394165f00"
+                },
+                {
+                  "key": "password",
+                  "value": "password",
+                  "type": "text",
+                  "uuid": "233adbab-7548-4943-b63b-cbeeea949fbf"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/categories",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "categories"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Books",
+      "item": [
+        {
+          "name": "Show Books",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/books",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "books"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Show Borrowed",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "1|6g5DHb57PIFgVaCHHmSEnVsemoyXmxmGKGCr2NyB1b556e43",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8000/api/borrows",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "borrows"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Borrow Book",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "1|6g5DHb57PIFgVaCHHmSEnVsemoyXmxmGKGCr2NyB1b556e43",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8000/api/books/4/borrow",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "books",
+                "4",
+                "borrow"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Return Book",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "1|6g5DHb57PIFgVaCHHmSEnVsemoyXmxmGKGCr2NyB1b556e43",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8000/api/borrows/1/return",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "borrows",
+                "1",
+                "return"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
